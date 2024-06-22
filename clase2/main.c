@@ -1,0 +1,66 @@
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <time.h>
+#include <unistd.h>
+
+#include <funciones.h>
+#include <definiciones.h>
+
+
+
+int main(int argc, char* argv[]) {
+
+	/*struct Persona p1;
+
+	printf("Ingrese nombre: ");
+	scanf("%s", p1.nombre);	
+
+	printf("Ingrese edad: ");
+	scanf("%d", &p1.edad);
+
+	printf("Ingrese altura: ");
+	scanf("%f", &p1.altura);
+
+	printf("\nNombre, edad, altura: ");
+	printf("%s %d %f", p1.nombre, p1.edad, p1.altura); */	
+
+	int desde, hasta;
+	int numArr[CANT_ARR]; 
+	int i, numAlea;
+
+
+	if(argc==3) {
+		desde = atoi(argv[1]);
+		hasta = atoi(argv[2]);
+	} else {
+		desde = 0;
+		hasta = 10;
+	}
+	
+	srand(time(0));
+
+	for(i=0; i<CANT_ARR; i++) {
+
+		do {
+			
+			numAlea = devolverAleatorio(desde, hasta);
+			
+		} while (estaRepetido(numArr, numAlea, i)); 
+
+		numArr[i] = numAlea; 
+	}
+
+	
+	printf("Numeros sin repetir, tam del array: %d\n", CANT_ARR);
+	for(i=0; i<CANT_ARR; i++) {
+		printf("- %d \n", numArr[i]);
+		sleep(1);
+	}
+
+	
+
+	printf("\n");	
+
+	return 0;
+}

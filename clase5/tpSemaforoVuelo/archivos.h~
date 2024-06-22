@@ -1,0 +1,16 @@
+#ifndef _ARCHIVOS
+#define _ARCHIVOS
+
+FILE* abrirArchivo(FILE* fp, char *szNombreArchivo, char *szModo);
+
+void cerrarArchivo(FILE* fp);
+
+int leerArchivo(FILE* fp, Vuelo v);
+
+void escribirArchivo(FILE* f, int vuelo, char *destino, char *nombre);
+
+int escribirArchivoPorLinea(char *szTextoAEscribir);
+
+void renombrarArchivo(char *archivo, char *nuevo_archivo);
+
+#endif

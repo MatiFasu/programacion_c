@@ -1,0 +1,20 @@
+CC=gcc-4.1
+
+CFLAGS = -Wall -O4 -std=gnu89 -pedantic-errors -Werrors
+HEADERS = -I./
+all: pienso jugador
+
+pienso: pienso.c pienso.h memcomp.c funciones.c semaforo.c clave.c
+
+	$(CC) -o pienso pienso.c memcomp.c funciones.c semaforo.c clave.c $(CFLAGS) $(HEADERS)
+
+jugador: jugador.c jugador.h memcomp.c funciones.c semaforo.c clave.c
+
+	$(CC) -o jugador jugador.c memcomp.c funciones.c semaforo.c clave.c $(CFLAGS) $(HEADERS)
+
+
+clean:
+	rm -rf *o pienso jugador
+	
+	
+	

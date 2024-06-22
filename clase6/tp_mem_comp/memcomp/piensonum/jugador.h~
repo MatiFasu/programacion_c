@@ -1,0 +1,12 @@
+#ifndef _jugador
+
+#define _jugador
+
+typedef struct juego
+{
+	char nombre_jugador[LARGO_CADENA];
+	int numero_pensado;
+	int estado_acierto;
+}juego;
+
+#endif

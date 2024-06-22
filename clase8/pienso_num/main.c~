@@ -1,0 +1,65 @@
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <sys/ipc.h>
+#include <sys/sem.h>
+#include <sys/shm.h>
+#include <pthread.h>
+
+#include "time.h"
+#include "unistd.h"
+
+#include <funciones.h>
+#include <def.h>
+#include <archivos.h>
+#include <global.h>
+#include <clave.h>
+#include <semaforo.h>
+#include <memoria.h>
+#include <cola.h>
+#include <thread.h>
+
+int main(int argc, char* argv[]) {
+	
+	pthread_t *idHilo;
+	pthread_attr_t atributos;
+
+	int i;
+	int cant_jugadores;
+	int num_aleatorio;
+	char *valorDevuelto = NULL;
+
+	cant_jugadores = atoi(argv[1]);
+
+	idHilo = (pthread_t *)malloc(sizeof(pthread_t)*cant_jugadores);
+
+	pthread_mutex_init(&mutex, NULL);
+	pthread_attr_init(&atributos);
+	pthread_attr_setdetachstate(&atributos, PTHREAD_CREATE_JOINABLE);
+
+	srand(time(NULL));
+	num_aleatorio = devolverAleatorio(1,10);
+
+	data.num_alea = num_aleatorio;
+	data.acierto = 0;
+
+	for(i=0; i < cant_jugadores; i++) {
+		if(pthread_create(&idHilo[i], &atributos, funcionThread, &data) !=0 ) {
+			perror("No puedo crear thread\n");
+			return 1;
+		}
+	}
+
+	sleep(1);
+
+	printf("Padre: espero al thread\n");
+
+	pthread_join(*idHilo, (void **)&valorDevuelto);
+	printf("Padre: ya ha terminado el thread\n");
+	printf("Padre: devuelve \"%s\"\n", valorDevuelto);
+
+	free(idHilo);		
+
+	printf("\n");
+	return 0;
+}

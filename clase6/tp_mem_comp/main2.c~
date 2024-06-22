@@ -1,0 +1,54 @@
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <sys/ipc.h>
+#include <sys/sem.h>
+#include <sys/shm.h>
+
+#include "time.h"
+#include "unistd.h"
+
+#include <funciones.h>
+#include <def.h>
+#include <archivos.h>
+#include <global.h>
+#include <clave.h>
+#include <semaforo.h>
+#include <memoria.h>
+
+
+
+int main(int argc, char* argv[]) {
+
+	dato *memoria = NULL;
+	int id_memoria;
+	int i;
+	int id_semaforo;
+
+	/*inicializo las variables en cero*/
+	struct Tesorero t = subirTesorero();
+
+	id_semaforo = creo_semaforo();
+
+	memoria = (dato*)creo_memoria(sizeof(dato)*CANTIDAD, &id_memoria);
+	
+	while(1)
+	{
+		espera_semaforo(id_semaforo);			
+			printf("leemos la memoria\n");
+			for (i=0; i<CANTIDAD; i++)
+			{
+					printf("Leido %d %d %d %d\n", memoria[i].cajero, memoria[i].importe, memoria[i].cheque, memoria[i].listo);
+			}
+			printf("Dejamos de leer la memoria\n");
+		levanta_semaforo(id_semaforo);
+		sleep(5);
+	}
+
+
+	shmdt ((char *)memoria);
+	shmctl (id_memoria, IPC_RMID, (struct shmid_ds *)NULL);
+
+	printf("\n");
+	return 0;
+}

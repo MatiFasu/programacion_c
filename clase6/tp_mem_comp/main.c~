@@ -1,0 +1,68 @@
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <sys/ipc.h>
+#include <sys/sem.h>
+#include <sys/shm.h>
+
+#include "time.h"
+#include "unistd.h"
+
+#include <funciones.h>
+#include <def.h>
+#include <archivos.h>
+#include <global.h>
+#include <clave.h>
+#include <semaforo.h>
+#include <memoria.h>
+
+/*
+los dos procesos no empiezen hasta que los dos procesos no esten corriendo
+*/
+
+int main(int argc, char* argv[]) {
+	
+	dato *memoria = NULL;
+	int id_memoria;
+	int i;
+	int id_semaforo;
+	int cajero;
+
+	srand(time(NULL));
+
+	id_semaforo = creo_semaforo();
+	
+	inicia_semaforo(id_semaforo, VERDE);
+
+	memoria = (dato*)creo_memoria(sizeof(dato)*CANT, &id_memoria);
+
+	cajero = atoi(argv[1]);
+
+	printf("CAJERO %d", cajero);
+
+	while(1)
+	{
+		espera_semaforo(id_semaforo);		
+			printf("Escribimos en la memoria\n");
+			for (i=0; i<100; i++)
+			{
+				if(memoria[i].listo == 0) {
+					memoria[i].cajero = cajero
+					memoria[i].importe  = devolverAleatorio(100, 1000);
+					memoria[i].cheque = devolverAleatorio(0,1);
+					memoria[i].listo = 1;
+					printf("Escrito %d %d %d %d\n", memoria[i].cajero, memoria[i].importe, memoria[i].cheque, memoria[i].listo);
+					sleep (1);
+				}
+			}
+			printf("Dejamos de escribir en la memoria\n");
+		levanta_semaforo(id_semaforo);
+		sleep (5);
+	}
+
+	shmdt ((char *)memoria);
+	shmctl (id_memoria, IPC_RMID, (struct shmid_ds *)NULL);
+
+	printf("\n");
+	return 0;
+}

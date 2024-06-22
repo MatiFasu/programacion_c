@@ -1,0 +1,108 @@
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <sys/ipc.h>
+#include <sys/sem.h>
+#include <sys/shm.h>
+
+#include "time.h"
+#include "unistd.h"
+
+#include <funciones.h>
+#include <def.h>
+#include <archivos.h>
+#include <global.h>
+#include <clave.h>
+#include <semaforo.h>
+#include <memoria.h>
+#include <cola.h>
+
+/*BANCO*/
+
+void procesar_evento(int id_cola_msg, mensaje msg, cliente *memoria);
+
+int main(int argc, char* argv[]) {
+	
+	int id_cola_mensajes;
+	mensaje msg;
+	int id_memoria, i;
+	cliente *memoria = NULL;
+	
+	memoria = (cliente*)creo_memoria(sizeof(cliente)*100, &id_memoria, CLAVE_BASE);
+
+	srand(time(NULL));
+
+	for(i=0; i<100; i++) {
+		memoria[i].numero_cliente = i+1;
+		memoria[i].saldo = devolverAleatorio(100,900);
+	}
+
+	id_cola_mensajes = creo_id_cola_mensajes();
+
+	while(1)
+	{
+		recibir_mensaje(id_cola_mensajes, MSG_BANCO, &msg);
+		procesar_evento(id_cola_mensajes, msg, memoria);
+	}
+
+	
+	printf("\n");
+	return 0;
+}
+
+void procesar_evento(int id_cola_msg, mensaje msg, cliente *memoria)
+{
+	int saldo;
+	int num_cliente = msg.nro_cuenta;
+
+	switch(msg.int_evento) {
+		case EVT_CONSULTA_SALDO:
+			printf("\nEl saldo de la cuenta %d es:\n", msg.nro_cuenta);
+			if(num_cliente>=0 && num_cliente<100) {
+				saldo = memoria[num_cliente].saldo;
+				printf("%d\n", saldo);		
+				enviar_mensaje(id_cola_msg, msg.int_rte, MSG_BANCO, EVT_RTA_SALDO, num_cliente, -1, "Consulta exitosa");
+			}
+			else {
+				enviar_mensaje(id_cola_msg, msg.int_rte, MSG_BANCO, EVT_RTA_SALDO_NOK, -1, -1, "El cliente no existe");
+			}
+			break;
+		case EVT_DEPOSITO:
+			printf("\nPedido deposito\n");
+			if(num_cliente>=0 && num_cliente<100) {
+				memoria[num_cliente].saldo += msg.monto;
+				printf("%d\n", memoria[num_cliente].saldo);		
+				enviar_mensaje(id_cola_msg, msg.int_rte, MSG_BANCO, EVT_RTA_DEPOSITO, num_cliente, memoria[num_cliente].saldo, 					"Deposito exitoso");	
+			}
+			else {
+				enviar_mensaje(id_cola_msg, msg.int_rte, MSG_BANCO, EVT_RTA_DEPOSITO_NOK, -1, -1, "El cliente no existe");
+			}		
+			break;
+		case EVT_EXTRACCION:
+			printf("\nPedido extraccion\n");
+			if(num_cliente>=0 && num_cliente<100) {
+				if(memoria[num_cliente].saldo < msg.monto) {
+					enviar_mensaje(id_cola_msg, msg.int_rte, MSG_BANCO, EVT_RTA_EXTRACCION_NOK, -1, -1, 						"Saldo de cuenta insuficiente");
+				}
+				else {
+					memoria[num_cliente].saldo -= msg.monto;
+					printf("%d\n", memoria[num_cliente].saldo);		
+					enviar_mensaje(id_cola_msg, msg.int_rte, MSG_BANCO, EVT_RTA_DEPOSITO, num_cliente, memoria[num_cliente].saldo, 						"Extraccion exitosa");	
+				}
+			}
+			else {
+				enviar_mensaje(id_cola_msg, msg.int_rte, MSG_BANCO, EVT_RTA_EXTRACCION_NOK, -1, -1, "El cliente no existe");
+			}
+			break;
+		default:
+			printf("\nEvento sin definir\n");
+			break;
+	}
+	
+	printf("--------------------------------\n");
+
+}	
+
+
+
+

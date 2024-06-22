@@ -1,0 +1,21 @@
+#ifndef _GLOBAL
+#define _GLOBAL
+
+typedef struct mistruct 
+{
+	int inEntero;
+}MISTRUCT;
+
+typedef struct tipo_dato dato;
+
+struct tipo_dato
+{
+	int cajero;
+	int importe;
+	int cheque;
+	int listo;
+};
+
+extern int ginEnteroP;
+
+#endif

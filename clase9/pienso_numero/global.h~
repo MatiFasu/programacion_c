@@ -1,0 +1,16 @@
+#ifndef _GLOBAL
+#define _GLOBAL
+
+#include <pthread.h>
+
+typedef struct tipo_jugador tJugador;
+struct tipo_jugador
+{
+	int nro_jugador;
+	int id_cola_msg;
+	int cant_jugadores;
+};
+
+extern int ginEnteroP;
+
+#endif

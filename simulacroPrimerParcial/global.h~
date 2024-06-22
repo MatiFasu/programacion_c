@@ -1,0 +1,14 @@
+#ifndef _GLOBAL
+#define _GLOBAL
+
+struct alumno {
+	int tipoAlumno;
+	int cantMat;
+	char nombreApellido[50];
+};
+
+
+
+extern int ginEnteroP;
+
+#endif

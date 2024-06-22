@@ -1,0 +1,12 @@
+#ifndef _vendedor
+#define _vendedor
+
+typedef struct descripcion
+{
+	int codigo;
+	int cantidad;
+	char nombre[LARGO_CADENA];
+}descripcion;
+int validaCant(struct descripcion *stDescripcion, int cantSolicitada, int idColchon)
+
+#endif

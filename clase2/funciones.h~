@@ -1,0 +1,10 @@
+#ifndef _FUNCIONES
+#define _FUNCIONES
+
+int devolverAleatorio(int desde, int hasta);
+
+int estaRepetido(int numArr[], int numAlea, int longitud);
+
+
+
+#endif

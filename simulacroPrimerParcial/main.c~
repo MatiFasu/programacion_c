@@ -1,0 +1,87 @@
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <sys/ipc.h>
+#include <sys/sem.h>
+
+#include "time.h"
+#include "unistd.h"
+
+#include <funciones.h>
+#include <def.h>
+#include <archivos.h>
+#include <global.h>
+#include <clave.h>
+#include <semaforo.h>
+
+
+
+int main(int argc, char* argv[]) {
+	
+	int id_semaforo, i=0;
+
+	struct alumno a[TAM];
+	
+	FILE* alumnos1 = NULL;
+	FILE* alumnos2 = NULL;
+
+	id_semaforo = creo_semaforo();
+	
+	inicia_semaforo(id_semaforo, VERDE);
+
+	alumnos1 = abrirArchivo(alumnos1, "alumnos1.dat", "w");
+	cerrarArchivo(alumnos1);
+	
+	alumnos2 = abrirArchivo(alumnos2, "alumnos2.dat", "w");
+	cerrarArchivo(alumnos2);
+
+	while(1)
+	{
+		do
+		{
+			printf("\nIngrese el tipo de alumno (1(inicial) o 2(validar)): ");
+			scanf("%d", &a[i].tipoAlumno);
+			
+			if(a[i].tipoAlumno==0) break;
+
+			if(a[i].tipoAlumno == 2)
+			{
+				printf("\nIngrese cant mat a validar: ");
+				scanf("%d", &a[i].cantMat);
+			} else {
+				a[i].cantMat = 0;
+			}
+
+			printf("\nIngrese nom y ape: ");
+		
+			memset(a[i].nombreApellido, 0x00, sizeof(a[i].nombreApellido));
+		
+			scanf("%s", a[i].nombreApellido);
+
+			espera_semaforo(id_semaforo);
+			
+			if(a[i].tipoAlumno == 1) {
+				alumnos1 = abrirArchivo(alumnos1, "alumnos1.dat", "a");
+				escribirArchivo1(alumnos1, a[i]);
+				cerrarArchivo(alumnos1);
+			}
+
+			if(a[i].tipoAlumno == 2) {
+				alumnos2 = abrirArchivo(alumnos2, "alumnos2.dat", "a");
+				escribirArchivo1(alumnos2, a[i]);
+				cerrarArchivo(alumnos2);
+			}
+			
+			levanta_semaforo(id_semaforo);
+
+			i++;
+
+		} while(a[i].tipoAlumno != 0);
+		
+		sleep(15);		
+	
+	}
+	
+	printf("\n");
+	return 0;
+}

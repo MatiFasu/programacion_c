@@ -1,0 +1,35 @@
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <sys/ipc.h>
+#include <sys/sem.h>
+#include <sys/shm.h>
+
+#include "time.h"
+#include "unistd.h"
+
+#include <funciones.h>
+#include <def.h>
+#include <archivos.h>
+#include <global.h>
+#include <clave.h>
+#include <semaforo.h>
+#include <memoria.h>
+#include <cola.h>
+
+void funcion(int valor1, int valor2)
+{
+	printf("\nValor 1: %d", valor1);
+	printf("\nValor 2: %d", valor2);
+}
+
+int main(int argc, char* argv[]) {
+	
+	void (*puntero_funcion)(int, int) = &funcion;
+
+	puntero_funcion(2,5);
+	
+
+	printf("\n");
+	return 0;
+}

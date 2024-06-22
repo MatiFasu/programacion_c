@@ -1,0 +1,16 @@
+#include <stdlib.h>
+#include <stdio.h>
+#include <time.h>
+#include <unistd.h>
+
+#include <funciones.h>
+#include <def.h>
+#include "global.h"
+
+
+void inicializarVariables()
+{
+	ginEnteroP = 0;
+}
+
+

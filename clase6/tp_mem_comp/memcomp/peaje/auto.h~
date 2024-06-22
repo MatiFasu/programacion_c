@@ -1,0 +1,12 @@
+#ifndef _auto
+#define _auto
+
+typedef struct peaje
+{
+	int numPeaje;
+	int autos;
+}peaje;
+
+int getlocationmin(struct peaje *stPeaje, int cantVias);
+
+#endif

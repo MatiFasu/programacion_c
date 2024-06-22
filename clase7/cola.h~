@@ -1,0 +1,13 @@
+#ifndef _COLA
+#define _COLA
+
+int creo_id_cola_mensajes();
+
+int borrar_mensajes(int);
+
+int recibir_mensaje(int, long , mensaje*);
+
+int enviar_mensaje(int, long, int, int, char*);
+
+
+#endif

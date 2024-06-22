@@ -1,0 +1,38 @@
+#include <thread.h>
+#include <pthread.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+
+#include "time.h"
+#include "unistd.h"
+
+#include <global.h>
+#include <funciones.h>
+
+void *funcionThread(void* parametro)
+{
+	int alea;
+	struct thread_data *my_data;
+	int i=0;
+	
+	my_data = (struct thread_data *)parametro;
+	
+	while(my_data->acierto == 0) {
+
+		pthread_mutex_lock(&mutex);
+		alea = devolverAleatorio(1,10);
+		printf("%d ---- %d\n",alea, my_data->num_alea);	
+		i++;
+		if(alea == my_data->num_alea) {
+			my_data->acierto = 1;
+			printf("Jugador %d acerto\n", my_data->id_jugador);
+		}
+		pthread_mutex_unlock(&mutex);	
+		sleep(3);
+
+	}
+
+	printf("el proceso tomo %d iteraciones antes de acertar\n", i);
+	pthread_exit((void *)"Listo");	
+}	

@@ -1,0 +1,61 @@
+#include <stdlib.h>
+#include <stdio.h>
+#include <stdbool.h>
+#include <time.h>
+
+#include <funciones.h>
+#include <definiciones.h>
+
+int devolverAleatorio(int desde, int hasta)
+{
+	return (rand() % (hasta - desde	+ 1)) + desde;	
+}
+
+int estaRepetido(int numArr[], int numAlea, int longitud) 
+{
+	int i;		
+	
+	for(i=0; i<longitud; i++) {
+		if(numArr[i]==numAlea) {
+			return 1;
+		}
+	}
+	
+	return 0;
+}
+
+/*int *generarValoresNoRepetitivos(int max_valores)
+{
+	int *numeros = (int *) malloc(max_valores * sizeof(int));
+	if(numeros = NULL) {
+		printf("Error: no se puede asignar memoria.\n");
+		exit(1);
+	}
+
+	bool *numeros_generados = (bool *) calloc(max_valores, sizeof(bool));
+	if(numeros_generados == NULL) {
+		printf("Error: no se pudo asignar memoria.\n");
+		exit(1);
+	}
+
+	srand(time(0));
+
+	int num_generado, i;
+	
+	for(i=0; i<max_valores; i++) {
+		do {
+			
+			num_generado = rand() % max_valores + 1;
+			
+		} while (num_generados[num_generado -1]); 
+
+		numeros[i] = num_generados;
+		numeros_generados[num_generado -1] = true;
+	}
+	
+	free(numeros_generados);
+	
+	return numeros;
+}*/
+
+

@@ -1,0 +1,10 @@
+#ifndef _peaje
+#define _peaje
+
+typedef struct peaje
+{
+	int numPeaje;
+	int autos;
+}peaje;
+
+#endif
