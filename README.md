@@ -1,4 +1,4 @@
-# Programación en C
+# Programación paralela
 
 Este documento resume los principales conceptos y temas cubiertos en la materia.
 
