@@ -1,6 +1,24 @@
 # Programación paralela
 
-Este documento resume los principales conceptos y temas cubiertos en la materia.
+🧩 Problemática
+
+A medida que los sistemas informáticos evolucionan, el volumen de datos y la complejidad de las aplicaciones aumentan considerablemente.
+Los programas que se ejecutan de forma secuencial (una tarea tras otra) no pueden aprovechar todo el potencial del hardware moderno, especialmente los procesadores multinúcleo.
+
+Esto genera problemas como:
+
+- Bajo rendimiento y mayores tiempos de ejecución.
+- Desaprovechamiento de recursos del sistema.
+- Dificultad para escalar aplicaciones que procesan grandes volúmenes de información o tareas concurrentes.
+
+⚙️ Qué se Resuelve
+
+La Programación Paralela busca dividir un problema complejo en subtareas que puedan ejecutarse simultáneamente, logrando así:
+
+- Acelerar el procesamiento mediante la ejecución concurrente de procesos e hilos.
+- Optimizar el uso de los recursos (CPU, memoria, dispositivos de E/S).
+- Mejorar la eficiencia y escalabilidad de las aplicaciones.
+- Facilitar la sincronización y comunicación entre procesos a través de mecanismos como semaforos, memoria compartida y colas de mensajes (POSIX).
 
 ## Contenidos
 
