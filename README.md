@@ -11,7 +11,7 @@ Esto genera problemas como:
 - Desaprovechamiento de recursos del sistema.
 - Dificultad para escalar aplicaciones que procesan grandes volúmenes de información o tareas concurrentes.
 
-⚙️ Qué se Resuelve
+⚙️ Como resolver
 
 La Programación Paralela busca dividir un problema complejo en subtareas que puedan ejecutarse simultáneamente, logrando así:
 
