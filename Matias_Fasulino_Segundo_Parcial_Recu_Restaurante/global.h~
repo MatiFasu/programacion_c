@@ -1,0 +1,54 @@
+#ifndef _GLOBAL
+#define _GLOBAL
+
+#include <pthread.h>
+
+typedef struct mistruct 
+{
+	int inEntero;
+}MISTRUCT;
+
+typedef struct tipo_dato dato;
+struct tipo_dato
+{
+	int numero;
+	char letra;
+};
+
+typedef struct tipo_mensajes mensaje;
+struct tipo_mensajes
+{
+	long long_dest; /*Destinatario*/
+	int int_rte;/*Remitente*/
+	int int_evento;/*Numero de evento*/
+	char char_mensaje[1024];/*mensajse*/
+};
+
+struct thread_data
+{
+	int *id_jugador;
+	int num_alea;
+	int acierto;
+};
+
+struct thread_data data;
+
+typedef struct tipo_mozo Mozo;
+struct tipo_mozo
+{
+	int id_mozo;
+	int id_cola_msg;
+	int nro_comida; /*eleccion del comenzal*/
+};
+
+typedef struct tipo_comida Comida;
+struct tipo_comida
+{
+	int nro_comida;
+	char nombre[30];
+	int postre;
+};
+
+extern int ginEnteroP;
+
+#endif

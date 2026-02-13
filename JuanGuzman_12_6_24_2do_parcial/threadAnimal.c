@@ -1,0 +1,166 @@
+#include "stdlib.h"
+#include "stdio.h"
+#include "string.h"
+#include "time.h"
+#include "unistd.h"
+
+#include "sys/ipc.h"
+#include "sys/shm.h"
+#include "pthread.h"
+
+#include "global.h"
+#include "funciones.h"
+#include "memoria.h"
+#include "def.h"
+#include "threadAnimal.h"
+#include "colaMensajeria.h"
+#include "logger.h"
+
+	/*int idQueue;
+	int id;
+	char nombre[30];
+	int tries;
+	int position;
+	int players;*/
+
+void *funcionThreadAnimal(void *param){
+
+	int debug = DEBUG_ON;
+	int key = RUN;
+
+	int idAnimal = 0;
+	int players = 0;
+	int tries = 0;
+	int position = 0;
+
+	int idMemoria = 0;
+	int idQueue = 0;
+
+	int idSender = 0;
+	long rteId = 0;
+	int allReady = 0;
+	int idReceiver = MSG_PANEL;
+
+	int input = 0;
+
+	int start = 0;
+	int firstLap = 0;
+	int pos = 0;
+	int avanzo = 0;
+	int recorrido = 0;
+	int minPasos = 0;
+	int maxPasos = 0;
+
+	char nombre[30];
+	char message[LARGO_MENSAJE];
+	
+	Mensaje msg;
+	Animal *animal = (Animal*) param;
+	CarreraSession *memoria = NULL;
+
+	memset(nombre,0x00,sizeof(nombre));
+	
+	memoria = (CarreraSession*)creoMemoria(sizeof(CarreraSession)*1,&idMemoria);
+
+	idAnimal= animal->id;
+	idQueue = animal->idQueue;
+	players = animal->players;
+	position = animal->position;
+	tries = animal->tries;
+	minPasos = animal->minPasos;
+	maxPasos = animal->maxPasos;
+	strncpy(nombre,animal->nombre,sizeof(nombre)-1);
+
+	idSender = MSG_ANIMAL+idAnimal;
+
+	idQueue = creoColaMensajes();
+	borrarMensajes(idQueue);
+
+	while(key == RUN){
+
+		sleep(1);
+		pthread_mutex_lock(&mutex);
+		sleep(1);
+
+		allReady = memoria[pos].allReady;
+		start = memoria[pos].start;
+
+		showBegin(debug);
+		if(allReady == players && start == 1){
+			key = STOP;
+			showStrIntLog("ID ",idAnimal,debug);
+			showStrStrLog("NOMBRE ",nombre,debug);
+			showStrIntLog("LISTOS TODOS ",allReady,debug);
+		}
+		else{
+			showStrIntLog("ID ",idAnimal,debug);
+			showStrStrLog("NOMBRE ",nombre,debug);
+			showStrIntLog("ESPERANDO HILOS HERMANOS ",allReady,debug);
+		}
+		showEnd(debug);
+
+		if(firstLap == 0){
+			memoria[pos].allReady ++;
+			firstLap = 1;
+		}
+
+		sleep(1);
+		pthread_mutex_unlock(&mutex);
+		sleep(1);
+	}
+
+	key = RUN;
+
+	while(key == RUN)
+	{
+		sleep(1);
+		pthread_mutex_lock(&mutex);
+		sleep(1);
+
+		showBegin(debug);
+		showStrIntLog("ID ANIMAL ",idAnimal,debug);
+		showStrStrLog("NOMBRE ",nombre,debug);
+
+		avanzo = inDevolverAleatorio(minPasos,maxPasos);
+		recorrido += avanzo;
+		tries++;
+
+		memset(message,0x00,sizeof(message));
+		sprintf(message,"%d",avanzo);
+		
+		showStrStrLog("PASOS AVANZADOS ",message,debug);
+		showStrIntLog("TOTAL RECORRIDO ",recorrido,debug);
+		showStrIntLog("VUELTA ",tries,debug);
+
+		enviarMensaje(idQueue,idReceiver,idSender,EVT_CORRO,message);
+
+		recibirMensaje(idQueue,idSender,&msg);
+		
+		switch(msg.intEvent)
+		{
+			
+			case EVT_INFO:
+				break;
+			
+			case EVT_END:
+				showStrLog("TERMINO LA CARRERA ",debug);
+				key = STOP;
+				input = atoi(msg.charMensaje);
+				if(input == idAnimal) showStrLog("GANEEEE ",debug);
+				break;
+			
+			default:
+				showStrLongLog("EVENTO SIN DEFINIR DE SENDER ",rteId,debug);
+				showEnd(debug);
+				break;
+							
+		}
+
+		sleep(1);
+		pthread_mutex_unlock(&mutex);
+		sleep(1);
+	}
+	animal->position = recorrido;
+	animal->tries = tries;
+	return NULL;
+}

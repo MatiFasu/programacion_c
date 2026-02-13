@@ -1,0 +1,4 @@
+#ifndef _THREADSJUGADOR
+#define _THREADSJUGADOR
+void *funcionThreadAnimal(void *param);
+#endif

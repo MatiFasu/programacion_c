@@ -1,0 +1,67 @@
+#include "stdlib.h"
+#include "stdio.h"
+#include "gestorArchivos.h"
+#include "global.h"
+#include "semaforo.h"
+#include "clave.h"
+#include "funciones.h"
+
+int creo_bomba= 0;
+FILE *archivo;
+void cargabomba(int artificieros, int cantidad_intentos);
+
+void buscacambios(int cable_desactiva);
+int main (int argc, char const *argv[])
+{
+	int i=0,cable_desactiva = 0, cantidad_intentos = 0, intentos = 0, cableseleccionado = 0, estado_bomba = 2;
+
+	cable_desactiva = createrandomparams(0, *argv[1]);
+	cantidad_intentos = createrandomparams(0, *argv[1]);
+	printf( "\n%d %d\n" ,*argv[1], *argv[2]);
+	if (creo_bomba == 0){
+		cargabomba(*argv[2], cantidad_intentos);
+	}else{
+		buscacambios(cable_desactiva);
+	}
+	
+	return 0;
+}
+
+
+void cargabomba(int artificieros, int cantidad_intentos)
+{
+	int numero_artificiero = 0 , i=0;
+	if(openfile("bomba.dat") == TRUE)
+	{
+	 	for (i= 1; i < artificieros +1;i++)
+	 	{
+	 	numero_artificiero = i;
+	 	fprintf(archivo,"%d %d %d %d\n",numero_artificiero, 0, 2, cantidad_intentos);
+		}
+		creo_bomba = 1;
+	}
+ 	fclose(archivo);
+}
+
+void buscacambios(int cable_desactiva){
+	int nro_artificiero, estado_bomba, cableseleccionado,intentos_restantes;	
+	if (openfileread("bomba.dat") == TRUE){
+	fscanf(archivo,"%d %d %d %d", &nro_artificiero,&cableseleccionado ,&estado_bomba, &intentos_restantes);
+	 if (estado_bomba == 0){
+		if (cable_desactiva == cableseleccionado){
+			printf("El artificiero %d Desactivo la bomba", nro_artificiero);
+			estado_bomba = 2;
+		}else
+		{
+			if(intentos_restantes == 0){
+				printf("Exploto la bomba");
+				
+			}
+		} 	
+	 }
+	}
+}
+ 
+ 
+ 
+

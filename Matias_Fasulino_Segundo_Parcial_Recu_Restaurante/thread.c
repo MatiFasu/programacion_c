@@ -1,0 +1,55 @@
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <pthread.h>
+
+#include "time.h"
+#include "unistd.h"
+
+#include <funciones.h>
+#include <global.h>
+#include <thread.h>
+#include <def.h>
+#include <cola.h>
+
+pthread_mutex_t mutex;
+
+void* funcionThread(void* parametro)
+{	
+	int id_mozo;
+	int id_cola_mensajes;
+	int nro_comida;
+	int done=1;
+	char cadena[50];
+	int postre;
+	
+	Mozo *datos_mozo = (Mozo*) parametro;
+	id_mozo = datos_mozo->id_mozo;
+	id_cola_mensajes = datos_mozo->id_cola_msg;
+
+	printf("Soy el Mozo %d\n", id_mozo);
+
+	while(done) {
+		printf("\nBloquear\n");
+		pthread_mutex_lock(&mutex);
+
+		nro_comida = devolverAleatorio(0,2);
+		postre = devolverAleatorio(0,1);
+		if(postre==0) {
+			printf("El cliente pidio al mozo %d la comida numero %d SIN POSTRE", id_mozo, nro_comida);
+		} else if(postre==1) {
+			printf("El cliente pidio al mozo %d la comida numero %d CON POSTRE", id_mozo, nro_comida);
+		}
+		sprintf(cadena, "%d-%d-%d", id_mozo, nro_comida, postre);
+		enviar_mensaje(id_cola_mensajes, MSG_RESTAURANTE, MSG_MOZO+datos_mozo->id_mozo, EVT_PEDIR, cadena);		
+
+		pthread_mutex_unlock(&mutex);
+		printf("\nDesbloquear\n");
+		sleep(20);		
+	};
+	
+
+
+	pthread_exit((void*)"Listo");
+}
+

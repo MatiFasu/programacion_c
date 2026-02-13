@@ -1,0 +1,52 @@
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <pthread.h>
+
+#include "time.h"
+#include "unistd.h"
+
+#include <funciones.h>
+#include <global.h>
+#include <animalThread.h>
+#include <def.h>
+#include <cola.h>
+
+pthread_mutex_t mutex;
+
+void* threadAnimal(void* parametro)
+{
+		
+	int id_hormiga;
+	int id_cola_mensajes;
+	char nombre_hormiga[50], cadena[50];
+	int pasos=0, pasos_totales=0;
+
+	Hormiga *datos_hormiga = (Hormiga*) parametro;
+	sprintf(nombre_hormiga, "%s", datos_hormiga->nombre); 
+	id_hormiga = datos_hormiga->id_hormiga;
+	id_cola_mensajes = datos_hormiga->id_cola_msg;
+
+	printf("\nSoy la hormiga %s\n", nombre_hormiga);
+
+	while(pasos_totales < META) {
+		printf("\nBloquear\n");
+		pthread_mutex_lock(&mutex);
+
+		pasos = devolverAleatorio(datos_hormiga->velocidad_min, datos_hormiga->velocidad_max);
+		printf("La hormiga %s dio %d pasos", nombre_hormiga, pasos);
+		sprintf(cadena, "%s-%d", nombre_hormiga, pasos);
+		pasos_totales += pasos;
+		printf("\nPasos totales: %d", pasos_totales);
+		enviar_mensaje(id_cola_mensajes, MSG_PISTA, MSG_HORMIGA+datos_hormiga->id_hormiga, EVT_CORRO, cadena);
+		datos_hormiga->cantidad_pasos += 1;		
+
+		pthread_mutex_unlock(&mutex);
+		printf("\nDesbloquear\n");
+		sleep(4);		
+	};
+
+
+	pthread_exit((void*)"Listo");
+}
+

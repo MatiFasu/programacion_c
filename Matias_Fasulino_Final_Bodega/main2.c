@@ -1,0 +1,126 @@
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <sys/ipc.h>
+#include <sys/sem.h>
+#include <sys/shm.h>
+#include <pthread.h>
+
+#include "time.h"
+#include "unistd.h"
+
+#include <funciones.h>
+#include <def.h>
+#include <archivos.h>
+#include <global.h>
+#include <clave.h>
+#include <semaforo.h>
+#include <memoria.h>
+#include <cola.h>
+#include <thread.h>
+
+/*Jugador*/
+
+int main(int argc, char* argv[]) {
+
+	int id_cola_mensajes;
+	int i;
+	int *memoria = NULL;
+	int id_memoria, id_semaforo;
+	char cadena[50];
+	int cantidad = CANTIDAD_PERSONAS;
+
+	Persona *datos_persona;
+	Vino *datos_vino;
+	pthread_t* idHilo;
+	pthread_attr_t atributos;
+	
+	memset(cadena, 0x00, sizeof(cadena));
+	srand(time(NULL));
+
+	id_semaforo = creo_semaforo();
+	memoria = (int*) creo_memoria(sizeof(int), &id_memoria, CLAVE_BASE);
+
+	*memoria += 1;
+	printf("Esperando que todos los procesos esten corriendo...\n");
+
+	if(*memoria == 1) {
+		printf("Esperando que todos los procesos esten corriendo...\n");
+		espera_semaforo(id_semaforo);
+	} else {
+		printf("Arranca el proceso\n");
+		levanta_semaforo(id_semaforo);
+	}
+
+	id_cola_mensajes = creo_id_cola_mensajes();
+	borrar_mensajes(id_cola_mensajes);
+
+	idHilo = (pthread_t*)malloc(sizeof(pthread_t)*cantidad);
+	pthread_attr_init(&atributos);
+	pthread_attr_setdetachstate(&atributos, PTHREAD_CREATE_JOINABLE);
+
+	datos_persona = (Persona*) (memoria + 1);
+	datos_vino = (Vino*) (memoria + 2);
+
+		/*Inicializo Vino*/
+		for(i=0; i<CANTIDAD_VINOS; i++) {
+			datos_vino[i].id_vino = i;
+			datos_vino[i].cantidad = 20000;
+			if( i==0) {
+				strcpy(datos_vino[i].nombre, "Vino1");
+			}
+			if( i==1) {
+				strcpy(datos_vino[i].nombre, "Vino2");
+			}
+			if( i==2) {
+				strcpy(datos_vino[i].nombre, "Vino3");
+			}
+		}
+		
+		/*Inicializo Persona*/
+		for(i=0; i<CANTIDAD_PERSONAS; i++) {
+			datos_persona[i].id_persona = i;
+			datos_persona[i].id_cola_msg = id_cola_mensajes;
+			datos_persona[i].total_consumido = 0;
+			pthread_create(&idHilo[i], &atributos, funcionThread, &datos_persona[i]);
+		}				
+		/*
+			
+			datos_persona[0].id_persona = 0;
+			datos_persona[0].id_cola_msg = id_cola_mensajes;
+			datos_persona[0].total_consumido = 0;
+			pthread_create(&idHilo[0], &atributos, funcionThread, &datos_persona[0]);
+			
+			datos_persona[1].id_persona = 1;
+			datos_persona[1].id_cola_msg = id_cola_mensajes;
+			datos_persona[1].total_consumido = 0;
+			pthread_create(&idHilo[1], &atributos, funcionThread, &datos_persona[1]);
+			
+			datos_persona[2].id_persona = 2;
+			datos_persona[2].id_cola_msg = id_cola_mensajes;
+			datos_persona[2].total_consumido = 0;
+			pthread_create(&idHilo[2], &atributos, funcionThread, &datos_persona[2]);
+			
+			datos_persona[3].id_persona = 3;
+			datos_persona[3].id_cola_msg = id_cola_mensajes;
+			datos_persona[3].total_consumido = 0;
+			pthread_create(&idHilo[3], &atributos, funcionThread, &datos_persona[3]);
+			
+			datos_persona[4].id_persona = 4;
+			datos_persona[4].id_cola_msg = id_cola_mensajes;
+			datos_persona[4].total_consumido = 0;
+			pthread_create(&idHilo[4], &atributos, funcionThread, &datos_persona[4]);
+		*/
+	for(i=0; i<cantidad; i++) {
+		pthread_join(idHilo[i], NULL);
+		printf("FIN\n");
+		sprintf(cadena, "Se termino");
+		enviar_mensaje(id_cola_mensajes, MSG_BODEGA, MSG_BODEGA, EVT_FIN, cadena);
+	}	
+
+
+	liberar_memoria((char*)memoria, id_memoria);
+	
+	printf("\n");
+	return 0;
+}

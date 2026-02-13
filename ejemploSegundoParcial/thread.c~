@@ -1,0 +1,53 @@
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <pthread.h>
+
+#include "time.h"
+#include "unistd.h"
+
+#include <funciones.h>
+#include <global.h>
+#include <thread.h>
+#include <def.h>
+#include <cola.h>
+
+pthread_mutex_t mutex;
+
+void* funcionThread(void* parametro)
+{
+	int id_cola_mensajes;
+		
+	int i=0;
+	int id_semaforo;
+	int presidente;
+	int vice;
+	
+	srand(time(NULL));
+
+	id_cola_mensajes = creo_id_cola_mensajes();
+	id_semaforo = creo_semaforo();
+
+	while(i<CANT_VOTOS) {
+		espera_semaforo(id_semaforo);
+
+		presidente = devolverAleatorio(1,2);
+		vice = devolverAleatorio(1,2);
+		
+		enviar_mensaje(id_cola_mensajes, MSG_PANEL, MSG_VOTANTE, EVT_VOTO, presidente, vice);
+		printf("\nVote por ");
+		if(presidente == 0) printf("señor MS y ");
+		else if(presidente == 1) printf("señor MI y ");
+		if(vice == 0) printf("señor A\n");
+		else if(vice == 1) printf("señora V\n");
+
+		levanta_semaforo(id_semaforo);
+
+		sleep(5);
+
+		i++;	
+	}
+	
+	return 0;
+}
+

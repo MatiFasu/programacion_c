@@ -1,0 +1,6 @@
+#ifndef _JUGADORTHREAD
+#define _JUGADORTHREAD
+
+void* thread(void* parametro);
+
+#endif

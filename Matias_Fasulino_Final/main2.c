@@ -1,0 +1,110 @@
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <sys/ipc.h>
+#include <sys/sem.h>
+#include <sys/shm.h>
+#include <pthread.h>
+
+#include "time.h"
+#include "unistd.h"
+
+#include <funciones.h>
+#include <def.h>
+#include <archivos.h>
+#include <global.h>
+#include <clave.h>
+#include <semaforo.h>
+#include <memoria.h>
+#include <cola.h>
+#include <thread.h>
+
+/*Jugador*/
+
+int main(int argc, char* argv[]) {
+
+	int id_cola_mensajes;
+	int i;
+	int cantidad=CANTIDAD_PAISES;
+	int *memoria = NULL;
+	int id_memoria, id_semaforo;
+	char cadena[50];
+
+	Pais *datos_pais;
+	pthread_t* idHilo;
+	pthread_attr_t atributos;
+	
+	memset(cadena, 0x00, sizeof(cadena));
+	srand(time(NULL));
+
+	id_semaforo = creo_semaforo();
+	memoria = (int*) creo_memoria(sizeof(int), &id_memoria, CLAVE_BASE);
+
+	*memoria += 1;
+	printf("Esperando que todos los procesos esten corriendo...\n");
+
+	if(*memoria == 1) {
+		printf("Esperando que todos los procesos esten corriendo...\n");
+		espera_semaforo(id_semaforo);
+	} else {
+		printf("Arranca el proceso\n");
+		levanta_semaforo(id_semaforo);
+	}
+
+	id_cola_mensajes = creo_id_cola_mensajes();
+	borrar_mensajes(id_cola_mensajes);
+
+	idHilo = (pthread_t*)malloc(sizeof(pthread_t)*cantidad);
+	pthread_attr_init(&atributos);
+	pthread_attr_setdetachstate(&atributos, PTHREAD_CREATE_JOINABLE);
+
+	/*datos_pais = (Pais*)malloc(sizeof(Pais)*cantidad);*/
+	datos_pais = (Pais*) (memoria + 1);
+
+		/* Lanzo Pais1 */
+		datos_pais[0].id_pais = 0;
+		datos_pais[0].id_cola_msg = id_cola_mensajes;
+		strcpy(datos_pais[0].nombre, "Japon");
+		datos_pais[0].barcos_vivos = CANTIDAD_BARCOS;
+		for(i=0; i<CANTIDAD_BARCOS; i++) {
+			datos_pais[0].barcos[i].id_barco = i;
+			datos_pais[0].barcos[i].nro_asignado = 2;
+			datos_pais[0].barcos[i].hundido = 0;
+		}
+		pthread_create(&idHilo[0], &atributos, funcionThread, &datos_pais[0]);
+		/* Lanzo Pais2 */
+		datos_pais[1].id_pais = 1;
+		datos_pais[1].id_cola_msg = id_cola_mensajes;
+		strcpy(datos_pais[1].nombre, "Inglaterra");
+		datos_pais[1].barcos_vivos = CANTIDAD_BARCOS;
+		for(i=0; i<CANTIDAD_BARCOS; i++) {
+			datos_pais[1].barcos[i].id_barco = i;
+			datos_pais[1].barcos[i].nro_asignado = 3;
+			datos_pais[1].barcos[i].hundido = 0;
+		}
+		pthread_create(&idHilo[1], &atributos, funcionThread, &datos_pais[1]);
+		/* Lanzo Pais3 */
+		datos_pais[2].id_pais = 2;
+		datos_pais[2].id_cola_msg = id_cola_mensajes;
+		strcpy(datos_pais[2].nombre, "Francia");
+		datos_pais[2].barcos_vivos = CANTIDAD_BARCOS;
+		for(i=0; i<CANTIDAD_BARCOS; i++) {
+			datos_pais[2].barcos[i].id_barco = i;
+			datos_pais[2].barcos[i].nro_asignado = 4;
+			datos_pais[2].barcos[i].hundido = 0;
+		}
+		pthread_create(&idHilo[2], &atributos, funcionThread, &datos_pais[2]);
+
+	for(i=0; i<cantidad; i++) {
+		pthread_join(idHilo[i], NULL);
+		printf("FIN\n");
+		sprintf(cadena, "Se termino");
+		enviar_mensaje(id_cola_mensajes, MSG_TABLERO, MSG_TABLERO, EVT_FIN, cadena);
+	}	
+
+
+	liberar_memoria((char*)memoria, id_memoria);
+	
+	printf("\n");
+	return 0;
+}

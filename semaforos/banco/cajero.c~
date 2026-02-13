@@ -1,0 +1,68 @@
+#include "stdlib.h"
+#include "stdio.h"
+#include "gestorArchivos.h"
+#include "funciones.h"
+#include "global.h"
+#include "string.h"
+#include "semaforo.h"
+FILE *archivo;
+void generacajero();
+int main (int argc, char const *argv[]){
+	int optmenu = 0,id_semaforo;
+	id_semaforo = creo_semaforo();
+	inicia_semaforo(id_semaforo,VERDE);
+	while (optmenu != -1)
+	{
+		printf("Ingrese una opcion: \n");
+		printf("1 Iniciar Cajeros\n");
+		printf("2 Loop to hell\n");
+		printf("-1 Salir\n");
+		scanf("%d",&optmenu);
+		switch(optmenu)
+		{
+			case 1:
+				espera_semaforo(id_semaforo);
+				generacajero();
+				levanta_semaforo(id_semaforo);
+				break;
+			case 2:
+				while (1){
+					espera_semaforo(id_semaforo);
+					generacajero();
+					levanta_semaforo(id_semaforo);
+					usleep(2500000);
+				}
+				break;
+			case -1:
+				printf("\nBye!\n");
+				break;
+			default:
+				printf("%d no es una opcion valida\n", optmenu);
+				break;
+		} 
+	
+	}
+
+	return 0;
+}
+
+
+void generacajero(){
+	char filename[LARGO_CADENA];
+	int nrocajero = 0,importe = 0, tipoimporte = 0, cantdepositos = 0;
+	memset(filename,0x00,sizeof(filename));
+	cantdepositos = createrandomparams(10,20);
+	nrocajero = createrandomparams(1,5);
+	sprintf(filename,"cajero%d.dat",nrocajero);
+	if (openfile(filename) == TRUE)
+	{
+		while (cantdepositos > 0)
+		{
+		importe = createrandomparams(100,500);
+		tipoimporte = createrandomparams(0,3);
+		fprintf(archivo,"%d %d\n",importe,tipoimporte);
+		cantdepositos -=1;	
+		}
+	}
+	fclose(archivo);	
+}

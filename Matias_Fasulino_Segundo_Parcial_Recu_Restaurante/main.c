@@ -1,0 +1,95 @@
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <sys/ipc.h>
+#include <sys/sem.h>
+#include <sys/shm.h>
+#include <pthread.h>
+
+#include "time.h"
+#include "unistd.h"
+
+#include <funciones.h>
+#include <def.h>
+#include <archivos.h>
+#include <global.h>
+#include <clave.h>
+#include <semaforo.h>
+#include <memoria.h>
+#include <cola.h>
+
+/*PANEL*/
+
+int main(int argc, char* argv[]) {
+	
+	int id_cola_mensajes;
+	int i, done=0;
+	Mozo mozos[CANTIDAD_MOZOS];
+	int* memoria = NULL;
+	int id_memoria, id_semaforo;
+	int id_mozo, nro_comida, postre;
+	mensaje msg;
+	Comida comidas[3];
+
+	id_cola_mensajes = creo_id_cola_mensajes();
+	borrar_mensajes(id_cola_mensajes);
+	id_semaforo = creo_semaforo();
+	memoria = (int*) creo_memoria(sizeof(int), &id_memoria, CLAVE_BASE);
+	
+	srand(time(NULL));
+	
+	/*Inicializar Comidas*/
+	for(i=0; i<3; i++) {
+		memset(comidas[i].nombre, 0x00, sizeof(comidas[i].nombre));
+		comidas[i].nro_comida = i;
+		comidas[i].postre = 0;
+		comidas[i].precio = devolverAleatorio(100,500);
+		if(i==0) {
+			strcpy(comidas[i].nombre,"Milanesa");
+		}
+		if(i==1) {
+			strcpy(comidas[i].nombre,"Fideos");
+		}
+		if(i==2) {
+			strcpy(comidas[i].nombre,"Carne");
+		}
+	}
+
+	*memoria += 1;
+	printf("Esperando que todos los procesos esten corriendo...\n");
+
+	if(*memoria==1) {
+		espera_semaforo(id_semaforo);
+	} else {
+		levanta_semaforo(id_semaforo);
+	}
+	
+	while(done<CANTIDAD_MOZOS) {
+		
+		recibir_mensaje(id_cola_mensajes, MSG_RESTAURANTE, &msg);
+
+		switch(msg.int_evento) {
+			
+			case EVT_PEDIR:
+				sscanf(msg.char_mensaje, "%d-%d-%d", &id_mozo, &nro_comida, &postre);
+				comidas[nro_comida].postre = postre;
+				printf("\nEl mozo %d sirve nro comida %d\n", id_mozo, nro_comida);
+				printf("Comida: %d - %s - %d - %d\n", comidas[nro_comida].nro_comida, comidas[nro_comida].nombre, 											comidas[nro_comida].precio, comidas[nro_comida].postre);
+				break;
+			case EVT_FIN:
+				printf("\nEVENTO FIN\n");
+				done += 1;
+				break;
+			default:
+				printf("\nEvento sin definir\n");
+				break;
+		}
+	
+		sleep(1);
+	};
+
+	liberar_memoria((char*)memoria, id_memoria);
+
+	printf("\n");
+	return 0;
+}

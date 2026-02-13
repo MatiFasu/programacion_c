@@ -1,0 +1,74 @@
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <sys/ipc.h>
+#include <sys/sem.h>
+#include <sys/shm.h>
+#include <pthread.h>
+
+#include "time.h"
+#include "unistd.h"
+
+#include <funciones.h>
+#include <def.h>
+#include <archivos.h>
+#include <global.h>
+#include <clave.h>
+#include <semaforo.h>
+#include <memoria.h>
+#include <cola.h>
+#include <thread.h>
+
+/*VOTANTE*/
+
+int main(int argc, char* argv[]) {
+
+	pthread_t idHilo;
+	pthread_attr_t atributos;	
+
+	mensaje msg;
+
+	int inicio = 0;
+	int no_inicio = 0;
+	int id_cola_mensajes;
+
+	id_cola_mensajes = creo_id_cola_mensajes();	
+
+	pthread_mutex_init(&mutex, NULL);
+	pthread_attr_init(&atributos);
+	pthread_attr_setdetachstate(&atributos, PTHREAD_CREATE_JOINABLE);
+
+	printf("Inicializando\n");
+
+	while(inicio == 0) {
+		
+		if(recibir_mensaje(id_cola_mensajes, MSG_VOTANTE, &msg) != -1) {
+			inicio = procesar_evento_votante(id_cola_mensajes, msg);
+			sleep(1);
+		}
+
+		no_inicio++;
+
+		sleep(3);
+
+		if(no_inicio == 30) {
+			printf("Debo iniciar main ante q este\n");
+			return 0;
+		}
+
+	}
+
+	printf("\n");
+	if(pthread_create(&idHilo, &atributos, funcionThread, NULL) != 0) {
+		perror("No se puede crear thread");
+		exit(-1);
+	}
+
+
+	pthread_join(idHilo, NULL);
+
+	pthread_mutex_destroy(&mutex);
+
+	printf("\n");
+	return 0;
+}

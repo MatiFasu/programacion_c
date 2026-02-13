@@ -1,0 +1,11 @@
+#ifndef _gestorArchivos
+#define _gestorArchivos
+FILE *lote;
+FILE *lote2;
+static int nronuevolote = 0;
+int readlote();
+void cargavuelo();
+void cargavuelorandom(int cantRandom);
+void generareservas();
+void setpasajeros(int pasajeros[]);
+#endif
